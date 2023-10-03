@@ -96,7 +96,7 @@ dist: $(NAME) docs  $(shell find $(NAME)) test-harness $(shell find . -maxdepth 
 	$(PYTHON) --version
 	pip install wheel build==0.10.0
 	$(PYTHON) -m build -o dist/$(NAME)/
-	cd test-harness && $(PYTHON) setup.py bdist_wheel  -d ../dist/$(NAME)-test-harness/
+	cd test-harness && $(PYTHON) -m build -o ../dist/$(NAME)-test-harness/
 
 install: dist ## Install the python library for the local user
 	$(PYTHON) -m pip install $(shell find dist -type f) --user
