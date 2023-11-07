@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.11
 
 RUN mkdir -p /usr/src/transform-plugins/groundtruth-mnist
 COPY requirements.txt /usr/src/transform-plugins/groundtruth-mnist

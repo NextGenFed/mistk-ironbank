@@ -2,7 +2,7 @@ UID:=$(shell id -u)
 GID:=$(shell id -g)
 USER:=$(shell whoami)
 VERSION:=$(shell git describe --abbrev=0 --always --tags)
-PYTHON:=$(shell which python3.6)
+PYTHON:=$(shell which python3.11)
 NAMESPACE:=mistk
 
 FULLNAME:=$(if $(FULLNAME),$(FULLNAME),$(NAME))

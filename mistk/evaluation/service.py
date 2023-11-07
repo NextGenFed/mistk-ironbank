@@ -30,7 +30,6 @@ from rwlock.rwlock import RWLock
 
 
 import mistk.data.utils
-from mistk.watch import watch_manager
 from mistk.data import MistkMetric, EvaluationSpecificationInitParams, EvaluationInstanceStatus, ObjectInfo, ServiceError
 
 from mistk.evaluation.server.controllers import evaluation_plugin_endpoint_controller
@@ -219,7 +218,6 @@ class EvaluationPluginEndpoint():
                 ver = self._status.object_info.resource_version + 1
                 info = ObjectInfo('EvaluationInstanceStatus', resource_version=ver)
                 self._status = EvaluationInstanceStatus(info, state=state, payload=payload)
-                watch_manager.notify_watch('status', item=self._status)
         except RuntimeError as inst:
             msg = "Runtime Error while updating state of EvaluationEndpointService: %s" % str(inst)
             logger.exception(msg)
@@ -259,7 +257,7 @@ class EvaluationPluginEndpoint():
             with self._status_lock.reader_lock:
                 if watch:
                     return Response(
-                        watch_manager.watch('status', resourceVersion, self._status),
+                        # watch_manager.watch('status', resourceVersion, self._status),
                         mimetype="application/json")
                 else:         
                     return self._status
