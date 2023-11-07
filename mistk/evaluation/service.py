@@ -257,7 +257,6 @@ class EvaluationPluginEndpoint():
             with self._status_lock.reader_lock:
                 if watch:
                     return Response(
-                        # watch_manager.watch('status', resourceVersion, self._status),
                         mimetype="application/json")
                 else:         
                     return self._status
