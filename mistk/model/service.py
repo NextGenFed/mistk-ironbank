@@ -28,7 +28,6 @@ from rwlock.rwlock import RWLock
 from mistk import logger
 from mistk.data import ModelInstanceInitParams as InitParams
 from mistk.data import ObjectInfo, ModelInstanceStatus, ServiceError, MistkDataset
-from mistk.watch import watch_manager
 from mistk.model.server.controllers import model_instance_endpoint_controller
 import mistk.data.utils as datautils
 
@@ -401,7 +400,6 @@ class ModelInstanceEndpoint():
             with self._status_lock.reader_lock:
                 if watch:
                     return Response(
-                        watch_manager.watch('status', resourceVersion, self._status),
                         mimetype="application/json")
                 else:         
                     return self._status
@@ -486,7 +484,6 @@ class ModelInstanceEndpoint():
                 ver = self._status.object_info.resource_version + 1
                 info = ObjectInfo('ModelInstanceStatus', resource_version=ver)
                 self._status = ModelInstanceStatus(info, state=state, payload=payload)
-                watch_manager.notify_watch('status', item=self._status)
         except RuntimeError as inst:
             msg = "Error while updating state of the ModelEndpointService. %s" % str(inst)
             logger.exception(msg)
