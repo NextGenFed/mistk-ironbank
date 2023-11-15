@@ -20,7 +20,7 @@ import setuptools
 
 REQUIRES=[
     'Werkzeug == 2.2.3',
-    'connexion[swagger-ui] == 2.14.2',
+    'connexion == 2.14.2',
     'certifi >= 2019.6.16',
     'python-dateutil >= 2.6.1',
     'setuptools >= 21.0.0',
