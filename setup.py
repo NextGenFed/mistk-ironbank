@@ -19,8 +19,8 @@ import setuptools
 
 
 REQUIRES=[
-    'Werkzeug >= 0.16.1',
-    'connexion >= 1.1.15',
+    'Werkzeug == 2.2.3',
+    'connexion[swagger-ui] == 2.14.2',
     'certifi >= 2019.6.16',
     'python-dateutil >= 2.6.1',
     'setuptools >= 21.0.0',
@@ -34,11 +34,11 @@ REQUIRES=[
     'six >= 1.12.0',
     'gevent == 23.9.1',
     'bottle >= 0.12.16',
-    'flask >= 1.0.2',
+    'flask == 2.2.5',
     'csvvalidator >= 1.2'
 ]
 
-version_args = {"version": "1.0.2"}
+version_args = {"version": "1.0.2.1"}
 
 setuptools.setup(
     name='mistk',

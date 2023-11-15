@@ -16,15 +16,8 @@
 ##############################################################################
 
 import mistk.log as log
-import os
-import resource
-from mistk.model import abstract_model, service
 
 log.config(__name__)
 logger = log.get_logger(__name__)
 
-if os.path.isfile('/sys/fs/cgroup/memory/memory.limit_in_bytes'):
-    with open('/sys/fs/cgroup/memory/memory.limit_in_bytes') as limit:
-        mem = int(limit.read())
-        resource.setrlimit(resource.RLIMIT_AS, (mem, mem))
-        logger.info("Set memory limit to " + str(mem))
+from mistk.model import abstract_model, service
