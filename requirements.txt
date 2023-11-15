@@ -1,5 +1,5 @@
 Werkzeug == 2.2.3
-connexion[swagger-ui] == 2.14.2
+connexion == 2.14.2
 certifi >= 2019.6.16
 urllib3 >= 1.25.3
 python-dateutil >= 2.6.1
