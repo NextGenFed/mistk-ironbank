@@ -30,6 +30,7 @@ from rwlock.rwlock import RWLock
 
 
 import mistk.data.utils
+from mistk.watch import watch_manager
 from mistk.data import TransformSpecificationInitParams, TransformInstanceStatus, ObjectInfo, ServiceError
 
 from mistk.transform.server.controllers import transform_plugin_endpoint_controller
@@ -202,6 +203,7 @@ class TransformPluginEndpoint():
                 ver = self._status.object_info.resource_version + 1
                 info = ObjectInfo('TransformInstanceStatus', resource_version=ver)
                 self._status = TransformInstanceStatus(info, state=state, payload=payload)
+                watch_manager.notify_watch('status', item=self._status)
         except RuntimeError as inst:
             msg = "Error while updating state of the TransformPluginService. %s" % str(inst)
             logger.exception(msg)
@@ -236,6 +238,7 @@ class TransformPluginEndpoint():
             with self._status_lock.reader_lock:
                 if watch:
                     return Response(
+                        watch_manager.watch('status', resourceVersion, self._status),
                         mimetype="application/json")
                 else:         
                     return self._status
@@ -243,9 +246,7 @@ class TransformPluginEndpoint():
             msg = "Error while retrieving status for transform plugin. %s" % str(inst)
             logger.exception(msg)
             return ServiceError(500, msg), 500
-        return 'do some magic!'
-       
-    
+
     def terminate(self):  # noqa: E501
         """
         Shutdowns the transform plugin and cleans up any resources.
