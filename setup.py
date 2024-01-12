@@ -25,7 +25,7 @@ REQUIRES=[
     'python-dateutil >= 2.6.1',
     'setuptools >= 21.0.0',
     'transitions == 0.6.4',
-    'pypubsub == 4.0.0',
+    'pypubsub == 4.0.3',
     'rwlock == 0.0.7',
     'wsgiserver == 1.3',
     'autologging >= 1.2.1',    
@@ -38,7 +38,7 @@ REQUIRES=[
     'csvvalidator >= 1.2'
 ]
 
-version_args = {"version": "1.0.3"}
+version_args = {"version": "1.0.3.1"}
 
 setuptools.setup(
     name='mistk',
