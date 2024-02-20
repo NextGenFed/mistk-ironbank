@@ -11,6 +11,8 @@ build-mistk:
     - changes:
       - mistk/*
       - smlcore/*
+      - models/*
+      - data-plugins/*
       when: always
     - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /releases\/.*/'
       when: always
@@ -42,7 +44,7 @@ test-mistk:
     - wget http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz -O /tmp/train/t10k-images-idx3-ubyte.gz
     - wget http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz -O /tmp/train/t10k-labels-idx1-ubyte.gz
     - cd mistk
-    - pip3 install -r requirements.txt
+    - pip3 install --trusted-host=pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
     - export PYTHONPATH=$PWD:$PYTHONPATH
     - export PYTHONPATH=$PWD/examples/models/logistic-regression:$PYTHONPATH
     - export PYTHONPATH=$PWD/examples/transforms/groundtruth-mnist:$PYTHONPATH
