@@ -1,0 +1,240 @@
+swagger: '2.0'
+info:
+  version: 1.3.0
+  title: Model Integration Software ToolKit - Orchestrator
+basePath: /v1/mistk/orchestrator
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+
+#################################
+# Orchestrator Plugin Endpoints #
+#################################
+
+  /initialize:
+    post:
+      operationId: initialize
+      x-swagger-router-controller: mistk.orchestrator.service
+      summary: Initialize the orchestrator
+      description: Instructs the orchestrator instance to initialize.
+      tags: [Orchestrator Instance Endpoint]
+      parameters:
+      - in: body
+        name: initializationParameters
+        description: >
+          Initialization parameters for the orchestrator including the objectives, properties, and hparams.
+          Objectives are a list of objectives for this orchestrator instance.
+          Properties are a dictionary of properties for this orchestrator instance.
+          Hparams are a dictionary of hyperparameters for this orchestrator instance.
+        required: true
+        schema:
+          $ref: "../smlcore/sml-api.yaml#/definitions/ModelInstanceInitParams"
+      responses:
+        '200':
+          description: Returns 200 if the task was successfully submitted.
+        '400':
+          description: Returns 400 if there is a task running when called.
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+        '500':
+          description: General server runtime exception
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+
+  /registerAgent:
+    post:
+      operationId: registerAgent
+      x-swagger-router-controller: mistk.orchestrator.service
+      tags: [Orchestrator Instance Endpoint]
+      summary: Registers an agent to the orchestrator
+      description: Connects an agent, which should have been initialized, to the orchestrator
+      parameters:
+      - in: query
+        name: agentName
+        description: The name of this agent
+        required: true
+        type: string
+      - in: query
+        name: agentUrl
+        description: The URL to this agent
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Returns 200 if the task was successfully submitted.
+        '400':
+          description: Returns 400 if there is a task running when called.
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+        '500':
+          description: General server runtime exception
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+
+  /startEpisode:
+    post:
+      operationId: startEpisode
+      x-swagger-router-controller: mistk.orchestrator.service
+      tags: [Orchestrator Instance Endpoint]
+      summary: Starts an episode
+      description: Instructs the container to have the orchestrator play an episode
+      parameters:
+      - in: body
+        name: episodeCfg
+        description: Configuration parameters needed to be used by that episode
+        required: true
+        schema:
+          type: object
+          #additionalProperties:
+          #  schema:
+          #    $ref: '#/definitions/MistkDataset'
+          #example:
+          #  train:
+          #    object_info:
+          #      name: 'image_training_dataset'
+          #      kind: 'MistkDataset'
+          #    modality: 'image'
+          #    format: 'image'
+          #  test:
+          #    object_info:
+          #      name: 'image_testing_dataset'
+          #      kind: 'MistkDataset'
+          #    modality: 'image'
+          #    format: 'image'
+          #  generate:
+          #    object_info:
+          #      name: 'image_generation_dataset'
+          #      kind: 'MistkDataset'
+          #    modality: 'text'
+          #    format: 'raw'
+      responses:
+        '200':
+          description: Returns 200 if the task was successfully submitted.
+        '400':
+          description: Returns 400 if there is a task running when called.
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+        '500':
+          description: General server runtime exception
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+
+  /status:
+    get:
+      summary: Get the status of the orchestrator
+      description: Retrieves the current status of the orchestrator
+      x-swagger-router-controller: mistk.orchestrator.service
+      tags: [Orchestrator Instance Endpoint]
+      operationId: getStatus
+      parameters:
+        - name: watch
+          description: >
+            Watch for changes to the described resources and return them as a
+            stream of add, update, and remove notifications.
+            Specify resourceVersion.
+          required: false
+          in: query
+          type: boolean
+          default: "False"
+        - name: resourceVersion
+          description: >
+            When specified with a watch call, shows changes that occur after
+            that particular version of a resource. Defaults to changes from the
+            beginning of history.
+          required: false
+          in: query
+          type: integer
+      responses:
+        '200':
+          description: Returns the status
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/OrchestratorInstanceStatus"
+
+  /stopEpisode:
+    post:
+      operationId: stopEpisode
+      x-swagger-router-controller: mistk.orchestrator.service
+      summary: Stops the episode that the orchestrator is currently playing
+      description: Stops the episode that the orchestrator is currently playing
+      tags: [Orchestrator Instance Endpoint]
+      responses:
+        '200':
+          description: >
+            Returns 200 if the task was successfully submitted.
+        '400':
+          description: >
+            Returns 400 if there is a task running when called.
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+        '500':
+          description: General server runtime exception
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+
+  /reset:
+    post:
+      operationId: reset
+      x-swagger-router-controller: mistk.orchestrator.service
+      summary: Resets the orchestrator
+      description: Resets the orchestrator
+      tags: [Orchestrator Instance Endpoint]
+      responses:
+        '200':
+          description: >
+            Returns 200 if the task was successfully submitted.
+        '400':
+          description: >
+            Returns 400 if there is a task running when called.
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+        '500':
+          description: General server runtime exception
+
+
+
+##########################
+# Definitions #
+##########################
+
+definitions:
+  MistkDataset:
+    allOf:
+      - $ref: '../smlcore/sml-api.yaml#/definitions/Dataset'
+      - type: object
+        properties:
+          dataPath:
+            type: string
+    example:
+      objectInfo:
+        name: 'example_dataset'
+        kind: 'MistkDataset'
+      dataPath: '/tmp'
+      modality: 'image'
+      format: 'image'
+  MistkMetric:
+    allOf:
+      - $ref: '../smlcore/sml-api.yaml#/definitions/Metric'
+  MistkMetricList:
+    description: A list of Metrics.
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: '#/definitions/MistkMetric'
+      continueToken:
+        type: string
+  MistkDataRecordList:
+      allOf:
+        - $ref: '../smlcore/sml-api.yaml#/definitions/DataRecordList'
+  MistkDataRecord:
+      allOf:
+        - $ref: '../smlcore/sml-api.yaml#/definitions/DataRecord'
+  MistkWatchEvent:
+    allOf:
+      - $ref: '../smlcore/sml-api.yaml#/definitions/WatchEvent'

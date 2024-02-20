@@ -17,9 +17,9 @@ all: $(NAME) docs dist
 
 clean: ## Remove all build artifacts
 	-$(PYTHON) setup.py clean
-	rm -rf gen $(NAME)/model/server $(NAME)/model/client $(NAME)/transform/server $(NAME)/transform/client $(NAME)/evaluation/server $(NAME)/evaluation/client
+	rm -rf gen $(NAME)/model/server $(NAME)/model/client $(NAME)/transform/server $(NAME)/transform/client $(NAME)/evaluation/server $(NAME)/evaluation/client $(NAME)/agent/server $(NAME)/agent/client $(NAME)/orchestrator/server $(NAME)/orchestrator/client
 	rm -rf build test-harness/build docs dist *.egg-info test-harness/*.egg-info sphinx_docs
-	find . -name __pycache__ -exec rm -rf {} \;
+	find . -name __pycache__ -exec rm -rf {} \; || true
 
 ../smlcore/sml-api.yaml:
 	cd ../smlcore && $(MAKE) sml-api.yaml
@@ -38,8 +38,16 @@ gen/$(NAME)/evaluation_server: $(API) ../smlcore/sml-api.yaml
 	rm -rf gen/$(NAME)/evaluation_server	
 	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/evaluation_server -i $(OUTPUT_BASE_DIR)/evaluation-api.yaml -D packageName=$(NAME).evaluation.server
 
+gen/$(NAME)/agent_server: $(API) ../smlcore/sml-api.yaml
+	rm -rf gen/$(NAME)/agent_server	
+	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/agent_server -i $(OUTPUT_BASE_DIR)/agent-api.yaml -D packageName=$(NAME).agent.server
 
-$(NAME)/server: gen/$(NAME)/model_server gen/$(NAME)/transform_server gen/$(NAME)/evaluation_server
+gen/$(NAME)/orchestrator_server: $(API) ../smlcore/sml-api.yaml
+	rm -rf gen/$(NAME)/orchestrator_server	
+	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/orchestrator_server -i $(OUTPUT_BASE_DIR)/orchestrator-api.yaml -D packageName=$(NAME).orchestrator.server
+
+
+$(NAME)/server: gen/$(NAME)/model_server gen/$(NAME)/transform_server gen/$(NAME)/evaluation_server gen/$(NAME)/agent_server gen/$(NAME)/orchestrator_server
 	rm -rf $(NAME)/model/server
 	mkdir -p $(NAME)/model/server
 	cp -rv gen/$(NAME)/model_server/$(NAME).model.server/* $(NAME)/model/server
@@ -54,6 +62,16 @@ $(NAME)/server: gen/$(NAME)/model_server gen/$(NAME)/transform_server gen/$(NAME
 	mkdir -p $(NAME)/evaluation/server	
 	cp -rv gen/$(NAME)/evaluation_server/$(NAME).evaluation.server/* $(NAME)/evaluation/server
 	cp -rv gen/$(NAME)/evaluation_server/$(NAME)/evaluation/server/* $(NAME)/evaluation/server
+	
+	rm -rf $(NAME)/agent/server
+	mkdir -p $(NAME)/agent/server	
+	cp -rv gen/$(NAME)/agent_server/$(NAME).agent.server/* $(NAME)/agent/server
+	cp -rv gen/$(NAME)/agent_server/$(NAME)/agent/server/* $(NAME)/agent/server
+	
+	rm -rf $(NAME)/orchestrator/server
+	mkdir -p $(NAME)/orchestrator/server	
+	cp -rv gen/$(NAME)/orchestrator_server/$(NAME).orchestrator.server/* $(NAME)/orchestrator/server
+	cp -rv gen/$(NAME)/orchestrator_server/$(NAME)/orchestrator/server/* $(NAME)/orchestrator/server
 
 
 gen/$(NAME)/model_client: $(API)
@@ -68,9 +86,18 @@ gen/$(NAME)/evaluation_client: $(API)
 	rm -rf gen/$(NAME)/evaluation_client
 	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/evaluation_client -i $(OUTPUT_BASE_DIR)/evaluation-api.yaml -D packageName=$(NAME).evaluation.client
 
-gen:: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME)/evaluation_client
+gen/$(NAME)/agent_client: $(API)
+	rm -rf gen/$(NAME)/agent_client
+	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/agent_client -i $(OUTPUT_BASE_DIR)/agent-api.yaml -D packageName=$(NAME).agent.client
 
-$(NAME)/client: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME)/evaluation_client
+gen/$(NAME)/orchestrator_client: $(API)
+	rm -rf gen/$(NAME)/orchestrator_client
+	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/orchestrator_client -i $(OUTPUT_BASE_DIR)/orchestrator-api.yaml -D packageName=$(NAME).orchestrator.client
+
+
+gen:: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME)/evaluation_client gen/$(NAME)/agent_client gen/$(NAME)/orchestrator_client
+
+$(NAME)/client: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME)/evaluation_client gen/$(NAME)/agent_client gen/$(NAME)/orchestrator_client
 	rm -rf $(NAME)/model/client
 	mkdir -p $(NAME)/model/client
 	cp -rv gen/$(NAME)/model_client/$(NAME).model.client/* $(NAME)/model/client
@@ -85,20 +112,30 @@ $(NAME)/client: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME
 	mkdir -p mistk/evaluation/client
 	cp -rv gen/$(NAME)/evaluation_client/mistk.evaluation.client/* mistk/evaluation/client
 	cp -rv gen/$(NAME)/evaluation_client/mistk/evaluation/client/* mistk/evaluation/client
+	
+	rm -rf mistk/agent/client
+	mkdir -p mistk/agent/client
+	cp -rv gen/$(NAME)/agent_client/mistk.agent.client/* mistk/agent/client
+	cp -rv gen/$(NAME)/agent_client/mistk/agent/client/* mistk/agent/client
+	
+	rm -rf mistk/orchestrator/client
+	mkdir -p mistk/orchestrator/client
+	cp -rv gen/$(NAME)/orchestrator_client/mistk.orchestrator.client/* mistk/orchestrator/client
+	cp -rv gen/$(NAME)/orchestrator_client/mistk/orchestrator/client/* mistk/orchestrator/client
 
 $(NAME): $(NAME)/server $(NAME)/client
 
 sphinx_docs:
 	rm -rf sphinx_docs
 	mkdir -p sphinx_docs
-	sphinx-apidoc -o sphinx_docs/ . -F -e -H "MISTK Model Developer API" -V "$(VERSION)" -R "$(VERSION)" -A "Asif Dipon, Andrew Shilliday, Tom Damiano"
+	sphinx-apidoc -o sphinx_docs/ . -F -e -H "MISTK Model Developer API" -V "$(VERSION)" -R "$(VERSION)" -A "Tim Siedlecki, Andrew Shilliday, Tom Damiano"
 	pushd sphinx_docs && sed -i old '15,17s/\# //' conf.py && make html && popd
 
 docs: $(API) ## Generate documentation for the API
 	rm -rf docs
 	$(CODEGEN) generate -l html -o $(OUTPUT_BASE_DIR)/docs -i $(YAML_FILE) -D packageVersion=$(VERSION)
 
-dist/$(NAME)-test-harness: $(NAME) $(shell find test-harness) $(shell find . -maxdepth 1 -type f)
+dist/$(NAME)-test-harness: $(NAME) $(shell find test-harness/mistk_test_harness) $(shell find . -maxdepth 1 -type f)
 	rm -rf dist/$(NAME)-test-harness && mkdir -p dist/$(NAME)-test-harness
 	cd test-harness && $(PYTHON) setup.py bdist_wheel  -d ../dist/$(NAME)-test-harness
 
@@ -106,14 +143,16 @@ dist/$(NAME): $(NAME) $(shell find $(NAME)) $(shell find . -maxdepth 1 -type f)
 	rm -rf dist/$(NAME) && mkdir -p dist/$(NAME)
 	$(PYTHON) setup.py bdist_wheel -d dist/$(NAME)/
 
-dist/src: docs $(NAME) $(shell find $(NAME)) $(shell find test-harness) $(shell find . -maxdepth 1 -type f)
+dist/src: docs $(NAME) $(shell find $(NAME)) $(shell find test-harness/mistk_test_harness) $(shell find . -maxdepth 1 -type f)
 	rm -rf dist/src && mkdir -p dist/src
 	cp -rf mistk test-harness dist/src
 	cp -rf MANIFEST.in README.md Dockerfile docs setup.py requirements.txt conf dist/src
 	cp Release_Makefile dist/src/Makefile
 	cp mistk/model/server/swagger/swagger.yaml dist/src/mistk-model-api.yaml
 	cp mistk/transform/server/swagger/swagger.yaml dist/src/mistk-transform-api.yaml
-	cp mistk/evaluation/server/swagger/swagger.yaml dist/src/mistk-evaluation-api.yaml  
+	cp mistk/evaluation/server/swagger/swagger.yaml dist/src/mistk-evaluation-api.yaml
+	cp mistk/agent/server/swagger/swagger.yaml dist/src/mistk-agent-api.yaml
+	cp mistk/orchestrator/server/swagger/swagger.yaml dist/src/mistk-orchestrator-api.yaml
 
 dist: docs dist/$(NAME) dist/$(NAME)-test-harness dist/src
 

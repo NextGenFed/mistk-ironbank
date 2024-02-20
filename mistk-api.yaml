@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 1.0.0
+  version: 1.3.0
   title: Model Integration Software ToolKit
 basePath: /v1/mistk
 schemes:
@@ -9,7 +9,7 @@ consumes:
   - application/json
 produces:
   - application/json
-  
+
 paths:
 
 ##########################
@@ -28,9 +28,9 @@ paths:
         name: initializationParameters
         description: >
           Initialization parameters for the model including the objectives, properties, and hparams.
-          Objectives are a list of objectives for this model instance from the following options 
-          {train, predict, stream_predict, generate, transfer_learning}.
-          Properties are a dictionary of properties for this model instance. 
+          Objectives are a list of objectives for this model instance from the following options
+          ['training', 'prediction', 'streaming_prediction', 'transfer_learning', 'generation', 'miniaturization'].
+          Properties are a dictionary of properties for this model instance.
           Hparams are a dictionary of hyperparameters for this model instance.
         required: true
         schema:
@@ -58,7 +58,7 @@ paths:
       - in: body
         name: datasets
         description: >
-          A dictionary mapping objectives to MistkDataset objects. 
+          A dictionary mapping objectives to MistkDataset objects.
           Dictionary keys must be one of the following {train, test, generate}
         required: true
         schema:
@@ -110,9 +110,47 @@ paths:
         name: modelPath
         description: >
           The absolute path to the directory where the model's checkpoint/snapshot
-          file can be found. 
+          file can be found.
         required: false
-        type: string        
+        type: string
+      responses:
+        '200':
+          description: Returns 200 if the task was successfully submitted.
+        '400':
+          description: Returns 400 if there is a task running when called.
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+        '500':
+          description: General server runtime exception
+          schema:
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+
+  /buildEnsemble:
+    post:
+      operationId: buildEnsemble
+      x-swagger-router-controller: mistk.model.service
+      tags: [Model Instance Endpoint]
+      summary: Build the ensemble
+      description: Instructs the container to construct the ensemble
+      parameters:
+      - in: query
+        name: ensemblePath
+        description: >
+          The absolute path to the directory where the ensemble's checkpoint/snapshot
+          file can be found.
+        required: false
+        type: string
+      - in: body
+        name: modelPaths
+        description: >
+          A dictionary mapping model names to their associated model directories. The dictionary
+          key is the individual model name with the value being the absolute path to the directories
+          where the individual models' checkpoint/snapshot files can be found.
+        required: false
+        schema:
+          type: object
+          additionalProperties:
+            type: string
       responses:
         '200':
           description: Returns 200 if the task was successfully submitted.
@@ -210,10 +248,10 @@ paths:
         in: query
         description: >
           Boolean flag to indicate whether prediction details (markdown) should be included
-          in predictions dictionary. 
+          in predictions dictionary.
         required: false
         type: boolean
-        default: "False"  
+        default: "False"
       responses:
         '200':
           description: Dictionary of IDs to predictions
@@ -235,7 +273,7 @@ paths:
       x-swagger-router-controller: mistk.model.service
       tags: [Model Instance Endpoint]
       summary: Updates streaming properties with the model
-      description: Update streaming properties 
+      description: Update streaming properties
       parameters:
       - in: body
         name: props
@@ -283,7 +321,7 @@ paths:
           description: General server runtime exception
           schema:
             $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
-  
+
   /generate:
     post:
       operationId: generate
@@ -302,7 +340,7 @@ paths:
           description: General server runtime exception
           schema:
             $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
-  
+
   /saveGenerations:
     post:
       operationId: saveGenerations
@@ -330,7 +368,39 @@ paths:
           description: General server runtime exception
           schema:
             $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
-          
+
+  /miniaturize:
+    post:
+      tags:
+        - "Model Instance Endpoint"
+      summary: "Miniaturize the model"
+      description: "Instructs the model instance to miniaturize."
+      operationId: "miniaturize"
+      parameters:
+        - name: "dataPath"
+          in: "query"
+          description: "A path pointing to the directory where the miniaturized model should be saved.\n"
+          required: true
+          type: "string"
+        - name: "includeHalfPrecision"
+          in: "query"
+          description: "Whether to attempt to reduce to half point precision format (FP16) when miniaturizing the model"
+          required: true
+          type: "boolean"
+          default: false
+      responses:
+        200:
+          description: "Returns 200 if the task was successfully submitted.\n"
+        400:
+          description: "Returns 400 if there is a task running when called.\n"
+          schema:
+            $ref: "#/definitions/ServiceError"
+        500:
+          description: "General server runtime exception"
+          schema:
+            $ref: "#/definitions/ServiceError"
+      x-swagger-router-controller: "mistk.model.service"
+
   /pause:
     post:
       operationId: pause
@@ -338,7 +408,7 @@ paths:
       tags: [Model Instance Endpoint]
       summary: Pause the model
       description: >
-        Instructs the container to pause the current training or 
+        Instructs the container to pause the current training or
         prediction activity
       responses:
         '200':
@@ -375,7 +445,7 @@ paths:
           description: General server runtime exception
           schema:
             $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
-          
+
   /resumePredict:
     post:
       operationId: resumePredict
@@ -396,8 +466,8 @@ paths:
         '500':
           description: General server runtime exception
           schema:
-            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"    
- 
+            $ref: "../smlcore/sml-api.yaml#/definitions/ServiceError"
+
   /status:
     get:
       summary: Get the status of the model
@@ -434,7 +504,7 @@ paths:
       operationId: terminate
       x-swagger-router-controller: mistk.model.service
       summary: Shut down the model
-      description: Shuts down the model 
+      description: Shuts down the model
       tags: [Model Instance Endpoint]
       responses:
         '200':
@@ -484,7 +554,10 @@ paths:
             type: string
         '500':
           description: General server runtime exception
-      
+
+##########################
+# Definitions #
+##########################
 
 definitions:
   MistkDataset:
@@ -514,6 +587,9 @@ definitions:
           $ref: '#/definitions/MistkMetric'
       continueToken:
         type: string
+  MistkDataRecordList:
+      allOf:
+        - $ref: '../smlcore/sml-api.yaml#/definitions/DataRecordList'
   MistkDataRecord:
       allOf:
         - $ref: '../smlcore/sml-api.yaml#/definitions/DataRecord'

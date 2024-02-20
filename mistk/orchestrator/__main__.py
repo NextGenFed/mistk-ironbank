@@ -15,11 +15,25 @@
 #
 ##############################################################################
 
-"""
-Wrapper python package for obtaining all MISTK Data Model classes. 
-"""
-from mistk.model.server.models import *  #pylint: disable=wildcard-import
-from mistk.transform.server.models import TransformInstanceStatus, TransformSpecificationInitParams
-from mistk.evaluation.server.models import EvaluationInstanceStatus, EvaluationSpecificationInitParams
-from mistk.agent.server.models import AgentInstanceStatus
-from mistk.orchestrator.server.models import OrchestratorInstanceStatus
+import sys
+import importlib
+import mistk.orchestrator.service
+from mistk.orchestrator.abstract_orchestrator import AbstractOrchestrator
+
+_endpoint_service = mistk.orchestrator.service.OrchestratorInstanceEndpoint()
+
+if len(sys.argv) <= 2:
+    raise RuntimeError("Requires a module and class name as an argument")
+
+_module = importlib.import_module(sys.argv[1])
+_orchestrator = getattr(_module, sys.argv[2])()
+assert isinstance(_orchestrator, AbstractOrchestrator)
+
+_endpoint_service.orchestrator = _orchestrator
+_orchestrator.endpoint_service = _endpoint_service
+
+try:
+    service_port = sys.argv[3]
+    _endpoint_service.start_server(port=int(service_port))
+except IndexError:
+    _endpoint_service.start_server() # defaults to 8080
