@@ -1,5 +1,5 @@
 # this model uses a generic python v3 base image
-FROM python:3.11
+FROM python:3.6
 
 RUN mkdir -p /usr/src/models/mnist-logistic-regression
 COPY requirements.txt /usr/src/models/mnist-logistic-regression

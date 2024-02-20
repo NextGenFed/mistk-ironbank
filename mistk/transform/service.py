@@ -246,7 +246,9 @@ class TransformPluginEndpoint():
             msg = "Error while retrieving status for transform plugin. %s" % str(inst)
             logger.exception(msg)
             return ServiceError(500, msg), 500
-
+        return 'do some magic!'
+       
+    
     def terminate(self):  # noqa: E501
         """
         Shutdowns the transform plugin and cleans up any resources.

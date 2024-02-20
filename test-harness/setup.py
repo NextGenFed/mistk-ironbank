@@ -15,19 +15,24 @@
 #
 ##############################################################################
 
+import os
 import setuptools
 
 REQUIRES=[
     'pandas >= 0.20.3',
     'scikit-learn  >= 0.19.1',
     'numpy >= 1.13.3',
-    'docker == 2.7.0',
+    'docker == 5.0.3',
     'scipy >= 1.0.0',
+    'dataclasses-json == 0.5.7',
     'mistk'
 ]
 
-version_args = {"version": "1.0.3.1"}
-
+if os.getenv("DIST_VERSION_OVERRIDE", False):
+    version_args = {"version": os.getenv("DIST_VERSION_OVERRIDE")}
+else:
+    version_args = {'use_scm_version': {"root": "../..", "relative_to": __file__}, 
+                    'setup_requires': ['setuptools_scm']}
 
 setuptools.setup(
     name='mistk-test-harness',
