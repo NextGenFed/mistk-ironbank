@@ -28,7 +28,7 @@ REQUIRES=[
     'pypubsub == 4.0.3',
     'rwlock == 0.0.7',
     'wsgiserver == 1.3',
-    'autologging >= 1.2.1',    
+    'autologging >= 1.2.1',
     'PyYAML >= 5.1.0',
     'urllib3 >= 1.25.3',
     'six >= 1.12.0',
@@ -38,7 +38,7 @@ REQUIRES=[
     'csvvalidator >= 1.2'
 ]
 
-version_args = {"version": "1.0.3.1"}
+version_args = {"version": "1.1.0"}
 
 setuptools.setup(
     name='mistk',
