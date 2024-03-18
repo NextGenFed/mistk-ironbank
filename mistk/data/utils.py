@@ -18,7 +18,7 @@
 import datetime
 import typing
 
-from connexion.apps.flask_app import FlaskJSONEncoder
+from connexion.jsonifier import JSONEncoder
 import six
 
 import mistk.data
@@ -38,7 +38,7 @@ NATIVE_TYPES_MAPPING = {
 }
 
 
-class PresumptiveJSONEncoder(FlaskJSONEncoder):
+class PresumptiveJSONEncoder(JSONEncoder):
     """
     A custom JSON encoder for Data objects
     """
@@ -59,7 +59,7 @@ class PresumptiveJSONEncoder(FlaskJSONEncoder):
                 attr = o.attribute_map[attr]
                 dikt[attr] = value
             return dikt
-        return FlaskJSONEncoder.default(self, o)
+        return JSONEncoder.default(self, o)
 
 def deserialize_model(data, klass):
     """
