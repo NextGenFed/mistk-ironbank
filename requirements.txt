@@ -1,5 +1,5 @@
-Werkzeug == 2.2.3
-connexion[swagger-ui] == 2.14.2
+Werkzeug == 3.0.1
+connexion[swagger-ui] == 3.0.6
 certifi >= 2019.6.16
 python-dateutil >= 2.6.1
 setuptools >= 21.0.0

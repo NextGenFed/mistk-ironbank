@@ -23,7 +23,6 @@ import uuid
 import connexion as cx
 import pkg_resources
 import yaml
-import wsgiserver
 
 from flask import Response
 from rwlock.rwlock import RWLock
@@ -35,7 +34,6 @@ from mistk.data import TransformSpecificationInitParams, TransformInstanceStatus
 
 from mistk.transform.server.controllers import transform_plugin_endpoint_controller
 import mistk.transform
-import connexion
 from mistk import logger
 
 class TransformPluginTask:
@@ -97,8 +95,7 @@ class TransformPluginEndpoint():
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        self.http_server = wsgiserver.WSGIServer(self.app, port=port)
-        self.http_server.start()
+        self.app.run(port=port)
 
     def _load_api_spec(self):
         """

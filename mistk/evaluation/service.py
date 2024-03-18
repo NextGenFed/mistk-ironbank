@@ -23,7 +23,6 @@ import uuid
 import connexion as cx
 import pkg_resources
 import yaml
-import wsgiserver
 
 from flask import Response
 from rwlock.rwlock import RWLock
@@ -35,7 +34,6 @@ from mistk.data import MistkMetric, EvaluationSpecificationInitParams, Evaluatio
 
 from mistk.evaluation.server.controllers import evaluation_plugin_endpoint_controller
 from mistk.evaluation.plugin_manager import EREPluginManager
-import connexion
 from mistk import logger
 
 class EvaluationPluginTask:
@@ -75,7 +73,6 @@ class EvaluationPluginEndpoint():
         self.app = cx.FlaskApp('mistk.evaluation.server')
         self.app.app.json_encoder = mistk.data.utils.PresumptiveJSONEncoder
         self.app.add_api(self._load_api_spec())
-        self.http_server = None
         
         self._state_machine = None
         self._evaluation_plugin = None
@@ -100,8 +97,7 @@ class EvaluationPluginEndpoint():
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        self.http_server = wsgiserver.WSGIServer(self.app, port=port)
-        self.http_server.start()
+        self.app.run(port=port)
 
     def _load_api_spec(self):
         """

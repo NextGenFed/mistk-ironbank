@@ -18,7 +18,7 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 import inspect, itertools, uuid
-import yaml, os, sys, pkg_resources, wsgiserver
+import yaml, os, sys, pkg_resources
 
 import connexion as cx
 from queue import Queue
@@ -47,7 +47,7 @@ class ModelInstanceTask:
         :param submitted: Optional flag indicating whether the task was submitted
         :param completed: Optional flag indicating whether the task was completed
         :param status: Optional status of the task
-        :param message: Optional text message regarding the status of the task        
+        :param message: Optional text message regarding the status of the task
         """
         self.operation = operation
         self.parameters = parameters
@@ -68,7 +68,6 @@ class ModelInstanceEndpoint():
         self.app = cx.FlaskApp('mistk_server')
         self.app.app.json_encoder = datautils.PresumptiveJSONEncoder
         self.app.add_api(self._load_api_spec())
-        self.http_server = None
         
         self._state_machine = None
         self._model = None
@@ -91,8 +90,7 @@ class ModelInstanceEndpoint():
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        self.http_server = wsgiserver.WSGIServer(self.app, port=port)
-        self.http_server.start()
+        self.app.run(port=port)
 
     def _load_api_spec(self):
         """
