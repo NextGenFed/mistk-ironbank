@@ -18,7 +18,7 @@
 import datetime
 import typing
 
-from connexion.jsonifier import JSONEncoder
+from connexion.jsonifier import JSONEncoder, Jsonifier
 import six
 
 import mistk.data
@@ -60,6 +60,16 @@ class PresumptiveJSONEncoder(JSONEncoder):
                 dikt[attr] = value
             return dikt
         return JSONEncoder.default(self, o)
+
+class PresumptiveJsonifier(Jsonifier):
+    def __init__(self, json_=json, **kwargs):
+        """
+        :param json_: json library to use. Must have loads() and dumps() method  # NOQA
+        :param kwargs: default arguments to pass to json.dumps()
+        """
+        self.json = json_
+        self.dumps_args = kwargs
+        self.dumps_args.setdefault("cls", PresumptiveJSONEncoder)
 
 def deserialize_model(data, klass):
     """

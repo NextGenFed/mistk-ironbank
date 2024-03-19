@@ -71,8 +71,7 @@ class TransformPluginEndpoint():
         initializeEndpointController(self, transform_plugin_endpoint_controller)
 
         self.app = cx.FlaskApp('mistk.transform.server')
-        self.app.app.json_encoder = mistk.data.utils.PresumptiveJSONEncoder
-        self.app.add_api(self._load_api_spec())
+        self.app.add_api(self._load_api_spec(), jsonifier=mistk.data.utils.PresumptiveJSONEncoder())
         self.http_server = None
         
         self._state_machine = None

@@ -71,8 +71,7 @@ class EvaluationPluginEndpoint():
         initializeEndpointController(self, evaluation_plugin_endpoint_controller)
 
         self.app = cx.FlaskApp('mistk.evaluation.server')
-        self.app.app.json_encoder = mistk.data.utils.PresumptiveJSONEncoder
-        self.app.add_api(self._load_api_spec())
+        self.app.add_api(self._load_api_spec(), jsonifier=mistk.data.utils.PresumptiveJSONEncoder())
         
         self._state_machine = None
         self._evaluation_plugin = None

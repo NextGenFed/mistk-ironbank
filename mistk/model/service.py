@@ -66,8 +66,7 @@ class ModelInstanceEndpoint():
         initializeEndpointController(self, model_instance_endpoint_controller)
 
         self.app = cx.FlaskApp('mistk_server')
-        self.app.app.json_encoder = datautils.PresumptiveJSONEncoder
-        self.app.add_api(self._load_api_spec())
+        self.app.add_api(self._load_api_spec(), jsonifier=datautils.PresumptiveJsonifier())
         
         self._state_machine = None
         self._model = None
