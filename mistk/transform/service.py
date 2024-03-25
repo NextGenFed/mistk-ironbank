@@ -17,6 +17,7 @@
 
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
+from importlib.metadata import version
 import inspect
 import itertools
 import uuid
@@ -297,8 +298,8 @@ class TransformPluginEndpoint():
         :return: The MISTK API version as text
         """
         try:
-            version = pkg_resources.require("mistk")[0].version
-            return version, 200
+            _version = version('mistk')
+            return _version, 200
         except Exception as ex:
             msg = 'Error occurred while attempting to retrieve MISTK API version: %s' % str(ex)
             logger.exception(msg)

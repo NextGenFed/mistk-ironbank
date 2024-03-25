@@ -38,7 +38,7 @@ REQUIRES=[
     'csvvalidator >= 1.2'
 ]
 
-version_args = {"version": "1.1.0"}
+version_args = {"version": "1.1.1"}
 
 setuptools.setup(
     name='mistk',
