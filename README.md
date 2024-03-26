@@ -31,4 +31,4 @@ Verify that mistk is now installed on PYTHON PATH by running::
 
     >>> import mistk
 
-See the full [MISTK Documentation](https://mistkml.github.io/) for detailed installation instructions and to get started with the toolkit. 
+See the full [MISTK Documentation](https://mistkml.github.io/) for detailed installation instructions and to get started with the toolkit.
