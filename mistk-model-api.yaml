@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "1.1.0"
+  version: "1.2.0"
   title: "Model Integration Software ToolKit"
 basePath: "/v1/mistk"
 schemes:
@@ -553,6 +553,9 @@ definitions:
       continueToken:
         type: "string"
     description: "A list of Metrics."
+  MistkDataRecordList:
+    allOf:
+    - $ref: "#/definitions/DataRecordList"
   MistkDataRecord:
     allOf:
     - $ref: "#/definitions/DataRecord"
@@ -900,11 +903,20 @@ definitions:
         description: "The arg name for prediction bounds"
     description: "The data parameters provides a mapping for data into the arguments\
       \ passed to the metric.  \n"
+  DataRecordList:
+    type: "object"
+    properties:
+      items:
+        type: "array"
+        items:
+          $ref: "#/definitions/DataRecord"
+      continueToken:
+        type: "string"
+    description: "A list of DataRecords."
   DataRecord:
     type: "object"
     required:
     - "recordId"
-    - "referencedSetId"
     properties:
       recordId:
         type: "string"

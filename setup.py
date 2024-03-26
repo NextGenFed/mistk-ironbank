@@ -15,7 +15,6 @@
 #
 ##############################################################################
 
-import os
 import setuptools
 
 
@@ -39,12 +38,12 @@ REQUIRES=[
     'csvvalidator >= 1.2'
 ]
 
-version_args = {"version": "1.1.1"}
+version_args = {"version": "1.2.0"}
 
 setuptools.setup(
     name='mistk',
     packages=setuptools.find_packages() + ['conf'],
-    package_data={'conf': ['*.ini']},
+    package_data={'conf': ['*.ini', 'log_config.json']},
     include_package_data=True,
     install_requires=REQUIRES,
     **version_args)
