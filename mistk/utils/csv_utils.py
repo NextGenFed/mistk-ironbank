@@ -39,7 +39,7 @@ def validate_predictions_csv(file_path):
         logger.error("No predictions file exists at %s" % file_path)
         return False
     
-    return _validate_csv(csv_file)
+    return validate_csv(csv_file)
 
 def validate_groundtruth_csv(file_path):
     """
@@ -59,9 +59,9 @@ def validate_groundtruth_csv(file_path):
         logger.error("No groundtruth file exists at %s" % file_path)
         return False
     
-    return _validate_csv(csv_file)
+    return validate_csv(csv_file)
 
-def _validate_csv(csv_file, output_file=None):
+def validate_csv(csv_file, output_file=None):
     """
     Validates a CSV file.
     

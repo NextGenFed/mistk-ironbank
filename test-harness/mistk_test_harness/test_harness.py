@@ -27,7 +27,7 @@ from mistk.transform.service import TransformPluginEndpoint
 from mistk.evaluation.service import EvaluationPluginEndpoint
 from mistk_test_harness import model_service_wrapper, transform_service_wrapper, evaluation_service_wrapper
 from mistk.evaluation.abstract_evaluation_plugin import AbstractEvaluationPlugin
-from mistk.utils.csv_utils import validate_predictions_csv, validate_groundtruth_csv
+from mistk.utils.file_utils import validate_predictions, validate_groundtruth
 
 
 class TestHarness(object):
@@ -120,8 +120,8 @@ class TestHarness(object):
             self._model_service.save_predictions(predictions_path)
             self.wait_for_state(self._model_service, 'save_predictions', 'ready')
             if predictions_validation_path:
-                if not validate_predictions_csv(predictions_validation_path):
-                    raise Exception("Failed to validate predictions csv file at %s" % predictions_validation_path)
+                if not validate_predictions(predictions_validation_path):
+                    raise Exception("Failed to validate predictions file at %s" % predictions_validation_path)
             
     def model_stream_predict(self, stream_input):
         """
@@ -270,10 +270,10 @@ class TestHarness(object):
         print('Evaluating...')
         
         # Validate the input ground truth and predictions csv file
-        if not validate_groundtruth_csv(gt_validation_path):
+        if not validate_groundtruth(gt_validation_path):
             msg = "Failed to validate ground truth csv file at %s" % gt_path
             raise Exception(msg)
-        if "predictions" == evaluation_input_format and not validate_predictions_csv(input_data_validation_path):
+        if "predictions" == evaluation_input_format and not validate_predictions(input_data_validation_path):
             msg = "Failed to validate predictions csv file at %s" % input_data_path
             raise Exception(msg)
         

@@ -98,7 +98,7 @@ docs: $(API) ## Generate documentation for the API
 	rm -rf docs
 	$(CODEGEN) generate -l html -o $(OUTPUT_BASE_DIR)/docs -i $(YAML_FILE) -D packageVersion=$(VERSION)
 
-dist/$(NAME)-test-harness: $(NAME) $(shell find test-harness) $(shell find . -maxdepth 1 -type f)
+dist/$(NAME)-test-harness: $(NAME) $(shell find test-harness/mistk_test_harness) $(shell find . -maxdepth 1 -type f)
 	rm -rf dist/$(NAME)-test-harness && mkdir -p dist/$(NAME)-test-harness
 	cd test-harness && $(PYTHON) setup.py bdist_wheel  -d ../dist/$(NAME)-test-harness
 
@@ -106,7 +106,7 @@ dist/$(NAME): $(NAME) $(shell find $(NAME)) $(shell find . -maxdepth 1 -type f)
 	rm -rf dist/$(NAME) && mkdir -p dist/$(NAME)
 	$(PYTHON) setup.py bdist_wheel -d dist/$(NAME)/
 
-dist/src: docs $(NAME) $(shell find $(NAME)) $(shell find test-harness) $(shell find . -maxdepth 1 -type f)
+dist/src: docs $(NAME) $(shell find $(NAME)) $(shell find test-harness/mistk_test_harness) $(shell find . -maxdepth 1 -type f)
 	rm -rf dist/src && mkdir -p dist/src
 	cp -rf mistk test-harness dist/src
 	cp -rf MANIFEST.in README.md Dockerfile docs setup.py requirements.txt conf dist/src
