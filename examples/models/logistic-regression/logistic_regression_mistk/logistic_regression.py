@@ -21,13 +21,15 @@
 import os
 import pickle
 import numpy as np 
-import base64, pkg_resources
+import base64
+import importlib.resources
 
 from sklearn.linear_model import LogisticRegression
 from logistic_regression_mistk.dataset_mnist import load_training_data, load_test_data
 from mistk.abstract_model import AbstractModel
 import mistk.log, logging
 logger = mistk.log.get_logger()
+
 
 class ScikitLearnLogisticRegressionModel(AbstractModel):
     def __init__(self):
@@ -224,8 +226,7 @@ class ScikitLearnLogisticRegressionModel(AbstractModel):
             predictions["details"] = self._format_stream_predict_details(predictions, detailed_data)
               
         return predictions
-    
-        
+
     def _format_stream_predict_details(self, predictions, prediction_details):
         """
         Format stream predict details in the form of NGX Markdown 
@@ -236,9 +237,10 @@ class ScikitLearnLogisticRegressionModel(AbstractModel):
         details = "# ATL Logistic Regression Model Results"
         details += "\nThese section contains details about the **ATL Logistic Regression Model Results**.<br/><br/>"
         details += "<br/><br/>"
-        
-        metric_image_path = 'metrics-test.png'
-        metric_image_data = pkg_resources.ResourceManager().resource_stream(__name__, 'metrics-test.png')
+
+        ref = importlib.resources.files(__name__).joinpath('metrics-test.png')
+        with ref.open('rb') as fp:
+            metric_image_data = fp.read()
         encoded_bytes = base64.b64encode(metric_image_data.read()).decode('UTF-8')
         details += "\n## Initial Training Results\n"
         details += f"\n![Test](data:image/png;base64,{encoded_bytes})"

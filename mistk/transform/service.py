@@ -18,17 +18,16 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from importlib.metadata import version
+import importlib.resources
 import inspect
 import itertools
 import uuid
 import connexion as cx
-import pkg_resources
 import yaml
 import wsgiserver
 
 from flask import Response
 from rwlock.rwlock import RWLock
-
 
 import mistk.data.utils
 from mistk.watch import watch_manager
@@ -36,8 +35,8 @@ from mistk.data import TransformSpecificationInitParams, TransformInstanceStatus
 
 from mistk.transform.server.controllers import transform_plugin_endpoint_controller
 import mistk.transform
-import connexion
 from mistk import logger
+
 
 class TransformPluginTask:
     """
@@ -107,8 +106,10 @@ class TransformPluginEndpoint():
         
         :param module: THe name of the module
         """
-        return yaml.load(pkg_resources.ResourceManager().resource_stream('mistk.transform', '/server/swagger/swagger.yaml'), Loader=yaml.SafeLoader)
-    
+        ref = importlib.resources.files('mistk.transform').joinpath('/server/swagger/swagger.yaml')
+        with ref.open('rb') as fp:
+            return yaml.load(fp, Loader=yaml.SafeLoader)
+
     @property
     def state_machine(self):
         """

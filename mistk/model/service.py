@@ -18,8 +18,9 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from importlib.metadata import version
+import importlib.resources
 import inspect, itertools, uuid
-import yaml, os, sys, pkg_resources, wsgiserver
+import yaml, os, sys, wsgiserver
 
 import connexion as cx
 from queue import Queue
@@ -32,6 +33,7 @@ from mistk.data import ObjectInfo, ModelInstanceStatus, ServiceError, MistkDatas
 from mistk.watch import watch_manager
 from mistk.model.server.controllers import model_instance_endpoint_controller
 import mistk.data.utils as datautils
+
 
 class ModelInstanceTask:
     """
@@ -56,8 +58,9 @@ class ModelInstanceTask:
         self.completed = completed
         self.status = status
         self.message = message
-     
-class ModelInstanceEndpoint():
+
+
+class ModelInstanceEndpoint:
     
     def __init__(self):
         """
@@ -98,10 +101,10 @@ class ModelInstanceEndpoint():
     def _load_api_spec(self):
         """
         Gets the API specification of the module specified
-        
-        :param module: THe name of the module
         """
-        return yaml.load(pkg_resources.ResourceManager().resource_stream('mistk', '/model/server/swagger/swagger.yaml'), Loader=yaml.SafeLoader)
+        ref = importlib.resources.files('mistk').joinpath('/model/server/swagger/swagger.yaml')
+        with ref.open('rb') as fp:
+            return yaml.load(fp, Loader=yaml.SafeLoader)
 
     @property
     def state_machine(self):
