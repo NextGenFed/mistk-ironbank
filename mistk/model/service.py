@@ -102,7 +102,7 @@ class ModelInstanceEndpoint:
         """
         Gets the API specification of the module specified
         """
-        ref = importlib.resources.files('mistk').joinpath('/model/server/swagger/swagger.yaml')
+        ref = importlib.resources.files('mistk').joinpath('model/server/swagger/swagger.yaml')
         with ref.open('rb') as fp:
             return yaml.load(fp, Loader=yaml.SafeLoader)
 

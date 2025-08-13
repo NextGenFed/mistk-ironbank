@@ -106,7 +106,7 @@ class TransformPluginEndpoint():
         
         :param module: THe name of the module
         """
-        ref = importlib.resources.files('mistk.transform').joinpath('/server/swagger/swagger.yaml')
+        ref = importlib.resources.files('mistk.transform').joinpath('server/swagger/swagger.yaml')
         with ref.open('rb') as fp:
             return yaml.load(fp, Loader=yaml.SafeLoader)
 
