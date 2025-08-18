@@ -18,9 +18,9 @@
 import setuptools
 
 
-REQUIRES=[
-    'Werkzeug == 2.2.3',
-    'connexion[swagger-ui] == 2.14.2',
+REQUIRES = [
+    'Werkzeug == 3.0.6',
+    'connexion[swagger-ui] == 3.2.0',
     'certifi >= 2019.6.16',
     'python-dateutil >= 2.6.1',
     'setuptools >= 21.0.0',
@@ -38,7 +38,7 @@ REQUIRES=[
     'csvvalidator >= 1.2'
 ]
 
-version_args = {"version": "1.2.1"}
+version_args = {"version": "1.2.2"}
 
 setuptools.setup(
     name='mistk',

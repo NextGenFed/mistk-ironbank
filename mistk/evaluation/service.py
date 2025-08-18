@@ -18,11 +18,11 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from importlib.metadata import version
+import importlib.resources
 import inspect
 import itertools
 import uuid
 import connexion as cx
-import pkg_resources
 import yaml
 import wsgiserver
 
@@ -36,8 +36,8 @@ from mistk.data import MistkMetric, EvaluationSpecificationInitParams, Evaluatio
 
 from mistk.evaluation.server.controllers import evaluation_plugin_endpoint_controller
 from mistk.evaluation.plugin_manager import EREPluginManager
-import connexion
 from mistk import logger
+
 
 class EvaluationPluginTask:
     """
@@ -108,8 +108,10 @@ class EvaluationPluginEndpoint():
         """
         Gets the API specification of the module specified
         """
-        return yaml.load(pkg_resources.ResourceManager().resource_stream('mistk.evaluation', '/server/swagger/swagger.yaml'), Loader=yaml.SafeLoader)
-    
+        ref = importlib.resources.files('mistk.evaluation').joinpath('server/swagger/swagger.yaml')
+        with ref.open('rb') as fp:
+            return yaml.load(fp, Loader=yaml.SafeLoader)
+
     def load_metrics_spec(self, module):
         """
         Gets the plug-in manager for defined metrics of the module specified
