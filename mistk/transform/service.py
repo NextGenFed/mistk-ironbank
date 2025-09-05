@@ -24,7 +24,7 @@ import itertools
 import uuid
 import connexion as cx
 import yaml
-import wsgiserver
+from waitress import serve
 
 from flask import Response
 from rwlock.rwlock import RWLock
@@ -75,8 +75,7 @@ class TransformPluginEndpoint():
         self.app = cx.FlaskApp('mistk.transform.server')
         self.app.app.json_encoder = mistk.data.utils.PresumptiveJSONEncoder
         self.app.add_api(self._load_api_spec())
-        self.http_server = None
-        
+
         self._state_machine = None
         self._transform_plugin = None
         self._current_task = None
@@ -97,8 +96,7 @@ class TransformPluginEndpoint():
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        self.http_server = wsgiserver.WSGIServer(self.app, port=port)
-        self.http_server.start()
+        serve(self.app, port=port)
 
     def _load_api_spec(self):
         """

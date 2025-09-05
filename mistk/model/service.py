@@ -20,7 +20,8 @@ from datetime import datetime
 from importlib.metadata import version
 import importlib.resources
 import inspect, itertools, uuid
-import yaml, os, sys, wsgiserver
+import yaml, os, sys
+from waitress import serve
 
 import connexion as cx
 from queue import Queue
@@ -72,8 +73,7 @@ class ModelInstanceEndpoint:
         self.app = cx.FlaskApp('mistk_server')
         self.app.app.json_encoder = datautils.PresumptiveJSONEncoder
         self.app.add_api(self._load_api_spec())
-        self.http_server = None
-        
+
         self._state_machine = None
         self._model = None
         self._current_task = None
@@ -95,8 +95,7 @@ class ModelInstanceEndpoint:
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        self.http_server = wsgiserver.WSGIServer(self.app, port=port)
-        self.http_server.start()
+        serve(self.app, port=port)
 
     def _load_api_spec(self):
         """
