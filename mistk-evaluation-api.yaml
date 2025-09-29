@@ -159,14 +159,14 @@ definitions:
     description: "The initialization parameters used by the Evaluation Specification\
       \ when calling its initialize function\n"
     example:
-      ground_truth_path: "ground_truth_path"
-      input_data_path: "input_data_path"
-      evaluation_path: "evaluation_path"
+      groundTruthPath: "ground_truth_path"
+      inputDataPath: "input_data_path"
+      evaluationPath: "evaluation_path"
       metrics:
       - ""
       - ""
-      evaluation_input_format: "predictions"
-      assessment_type: "assessment_type"
+      evaluationInputFormat: "predictions"
+      assessmentType: "assessment_type"
       properties: "{}"
   ServiceError:
     type: "object"
