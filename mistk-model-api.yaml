@@ -59,19 +59,19 @@ paths:
           type: "object"
           example:
             train:
-              object_info:
+              objectInfo:
                 name: "image_training_dataset"
                 kind: "MistkDataset"
               modality: "image"
               format: "image"
             test:
-              object_info:
+              objectInfo:
                 name: "image_testing_dataset"
                 kind: "MistkDataset"
               modality: "image"
               format: "image"
             generate:
-              object_info:
+              objectInfo:
                 name: "image_generation_dataset"
                 kind: "MistkDataset"
               modality: "text"
@@ -581,8 +581,8 @@ definitions:
         type: "object"
         example:
           arch: "densenet"
-          model_load_file: "checkpoint.pth"
-          num_labels: 1000
+          modelLoadFile: "checkpoint.pth"
+          numLabels: 1000
         description: "A dictionary of settings or configuration values that are passed\
           \ from the ecosystem, but are not considered model hyperparameters. Model\
           \  properties are typically defined by a specific implementation of an \
@@ -592,25 +592,25 @@ definitions:
       hyperparameters:
         type: "object"
         example:
-          learning_rate: 0.001
+          learningRate: 0.001
           momentum: 0.9
-          weight_decay: 4.0E-4
+          weightDecay: 4.0E-4
         description: "A dictionary of hyperparameters that are used by the model.\
           \ Hyperparameters are typically defined by the algorithm that a model is\
           \ based on. \n"
         properties: {}
     example:
       hyperparameters:
-        learning_rate: 0.001
+        learningRate: 0.001
         momentum: 0.9
-        weight_decay: 4.0E-4
+        weightDecay: 4.0E-4
       objectives:
       - "training"
       - "training"
       modelProperties:
         arch: "densenet"
-        model_load_file: "checkpoint.pth"
-        num_labels: 1000
+        modelLoadFile: "checkpoint.pth"
+        numLabels: 1000
   ServiceError:
     type: "object"
     required:
