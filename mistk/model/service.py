@@ -21,7 +21,7 @@ from importlib.metadata import version
 import importlib.resources
 import inspect, itertools, uuid
 import yaml, os, sys
-from waitress import serve
+from bottle import run
 
 import connexion as cx
 from queue import Queue
@@ -71,7 +71,9 @@ class ModelInstanceEndpoint:
         initializeEndpointController(self, model_instance_endpoint_controller)
 
         self.app = cx.FlaskApp('mistk_server')
-        self.app.app.json_encoder = datautils.PresumptiveJSONEncoder
+        self.app.app.json_provider_class = datautils.PresumptiveJSONEncoder3
+        self.app.app.json = datautils.PresumptiveJSONEncoder3(self.app.app)
+
         self.app.add_api(self._load_api_spec())
 
         self._state_machine = None
@@ -95,7 +97,8 @@ class ModelInstanceEndpoint:
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        serve(self.app, port=port)
+        host = '0.0.0.0'
+        run(self.app, host=host, port=port, server='gevent')
 
     def _load_api_spec(self):
         """
@@ -141,16 +144,17 @@ class ModelInstanceEndpoint:
         """
         self._model = model
                 
-    def initialize_model(self, initializationParameters):
+    def initialize_model(self, body=None):
         """
-        Creates and returns an Task which initializes the model with the 
+        Creates and returns a Task which initializes the model with the
         optional parameters provided
         
-        :param initializationParameters: The parameters used for initialization
+        :param body: The parameters used for initialization
         :return: The created Task object
         """
         logger.debug("Initialize model called")
         try:
+            initializationParameters = body
             params = initializationParameters
             if not isinstance(params, InitParams) and cx.request.is_json:
                 params = datautils.deserialize_model(cx.request.get_json(), InitParams)
@@ -185,15 +189,16 @@ class ModelInstanceEndpoint:
             logger.exception(msg)
             return ServiceError(500, msg), 500
         
-    def build_ensemble(self, ensemblePath=None, modelPaths=None):
+    def build_ensemble(self, body=None, ensemblePath=None):
         """
         Creates and returns a Task which builds the ensemble using the ensemble_path and model_paths provided
         
-        :param ensemble_path: The path to the ensemble model file
-        :param model_paths: The paths to the model files in a dictionary. The key is the model name with the value being the model path.
+        :param ensemblePath: The path to the ensemble model file
+        :param body: The paths to the model files in a dictionary. The key is the model name with the value being the model path.
         :return: The created Task object
         """
         logger.debug("build ensemble called")
+        modelPaths = body
         try:
             task = ModelInstanceTask(operation="build_ensemble", 
                                         parameters = {"ensemble_path": ensemblePath,
@@ -204,14 +209,15 @@ class ModelInstanceEndpoint:
             logger.exception(msg)
             return ServiceError(500, msg), 500        
         
-    def load_data(self, datasets):
+    def load_data(self, body=None):
         """
         Creates and returns a Task which loads data into a model using the bindings provided
         
-        :param datasets: dictionary mapping dataset function to dataset
+        :param body: dictionary mapping dataset function to dataset
         :return: The create Task object
         """
         logger.debug("Load data called")
+        datasets = body
         try:            
             if not isinstance(list(datasets.values())[0], MistkDataset) and cx.request.is_json:
                 datasets = {key : datautils.deserialize_model(ds, MistkDataset) for 
@@ -269,13 +275,14 @@ class ModelInstanceEndpoint:
             logger.exception(msg)
             return ServiceError(500, msg), 500
         
-    def stream_predict(self, dataMap, details=None):
+    def stream_predict(self, body=None, details=None):
         """
         Creates a Task which kicks off a stream prediction activity
         
-        :param dataMap: Dictionary of IDs to b64 encoded data
+        :param body: Dictionary of IDs to b64 encoded data
         :return: Dictionary of IDs to predictions
         """
+        dataMap = body
         try:
             task = ModelInstanceTask(operation="stream_predict", 
                                      parameters = {"data_map": dataMap,
@@ -293,12 +300,13 @@ class ModelInstanceEndpoint:
             logger.exception(msg)
             return ServiceError(500, msg), 500
 
-    def update_stream_properties(self, props):
+    def update_stream_properties(self, body=None):
         """
         Creates a task for updating the streaming prediction properties.
 
-        :param props: Dictionary of metadata properties to be used by the model
+        :param body: Dictionary of metadata properties to be used by the model
         """
+        props = body
         try:
             task = ModelInstanceTask(operation="update_stream_properties",
                                      parameters={"props": props})
@@ -344,7 +352,7 @@ class ModelInstanceEndpoint:
         Creates and returns a Task which saves the generations generated by a model
         to the path specified
         
-        :param dataPath: The location in which to save the model generations
+        :param data_path: The location in which to save the model generations
         :return: The created Task object
         """
         try:
@@ -574,8 +582,4 @@ def initializeEndpointController(handler, *modules):
     for name, fn1 in fns:
         sig1 = inspect.signature(fn1)
         logger.debug("Building redirect for " + name + str(sig1))
-        
-        fn2 = getattr(handler, name)
-        sig2 = inspect.signature(fn2)
-        assert sig1 == sig2, f"Can't redirect {name} : {sig1} - {sig2})"
         globals()[name] = getattr(handler, name)

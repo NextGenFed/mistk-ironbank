@@ -19,7 +19,9 @@ import datetime
 import typing
 
 from connexion.apps.flask_app import FlaskJSONEncoder
+from flask.json.provider import DefaultJSONProvider
 import six
+import bson
 
 import mistk.data
 from mistk import logger
@@ -60,6 +62,40 @@ class PresumptiveJSONEncoder(FlaskJSONEncoder):
                 dikt[attr] = value
             return dikt
         return FlaskJSONEncoder.default(self, o)
+
+class PresumptiveJSONEncoder3(DefaultJSONProvider):
+    """
+    A custom JSON encoder for SML Data objects
+    """
+    include_nulls = False
+
+    def default(self, o):  #pylint: disable=method-hidden
+        """
+        Defines the encoder for the object provided
+
+        :param o: The object to create an encoder for
+        """
+        if hasattr(o, 'swagger_types') and hasattr(o, 'attribute_map'):
+            dikt = {}
+            for attr, _ in six.iteritems(o.swagger_types):
+                value = getattr(o, attr)
+                if value is None and not self.include_nulls:
+                    continue
+                attr = o.attribute_map[attr]
+                dikt[attr] = value
+            return dikt
+        elif hasattr(o, 'openapi_types') and hasattr(o, 'attribute_map'):
+            dikt = {}
+            for attr, _ in six.iteritems(o.openapi_types):
+                value = getattr(o, attr)
+                if value is None and not self.include_nulls:
+                    continue
+                attr = o.attribute_map[attr]
+                dikt[attr] = value
+            return dikt
+        elif isinstance(o, bson.ObjectId):
+            return str(o)
+        return super().default(o)
 
 def serialize_model(data):
     """

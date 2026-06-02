@@ -24,11 +24,10 @@ import itertools
 import uuid
 import connexion as cx
 import yaml
-from waitress import serve
+from bottle import run
 
 from flask import Response
 from rwlock.rwlock import RWLock
-
 
 import mistk.data.utils
 from mistk.watch import watch_manager
@@ -74,7 +73,8 @@ class EvaluationPluginEndpoint():
         initializeEndpointController(self, evaluation_plugin_endpoint_controller)
 
         self.app = cx.FlaskApp('mistk.evaluation.server')
-        self.app.app.json_encoder = mistk.data.utils.PresumptiveJSONEncoder
+        self.app.app.json_provider_class = mistk.data.utils.PresumptiveJSONEncoder3
+        self.app.app.json = mistk.data.utils.PresumptiveJSONEncoder3(self.app.app)
         self.app.add_api(self._load_api_spec())
 
         self._state_machine = None
@@ -100,7 +100,8 @@ class EvaluationPluginEndpoint():
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        serve(self.app, port=port)
+        host = '0.0.0.0'
+        run(self.app, host=host, port=port, server='gevent')
 
     def _load_api_spec(self):
         """
@@ -294,17 +295,17 @@ class EvaluationPluginEndpoint():
             return ServiceError(500, msg), 500
     
     
-    def evaluate(self, initParams):  # noqa: E501
+    def evaluate(self, body=None):  # noqa: E501
         """
         Performs the evaluation defined for this plugin
     
-        :param initParams: Init Parameters for the evaluation. Based on EvaluationSpecificationInitParams specification
-        :type initParams: dict | bytes
+        :param body: Init Parameters for the evaluation. Based on EvaluationSpecificationInitParams specification
+        :type body: dict | bytes
     
         :rtype: None
         """
         logger.debug("evaluation called")
-         
+        initParams = body
         try:
             if not isinstance(initParams, EvaluationSpecificationInitParams) and cx.request.is_json:
                 initParams = mistk.data.utils.deserialize_model(cx.request.get_json(), EvaluationSpecificationInitParams)
@@ -377,8 +378,4 @@ def initializeEndpointController(handler, *modules):
     for name, fn1 in fns:
         sig1 = inspect.signature(fn1)
         logger.debug("Building redirect for " + name + str(sig1))
-        
-        fn2 = getattr(handler, name)
-        sig2 = inspect.signature(fn2)
-        assert sig1 == sig2, "Can't redirect " + name +" : " + str(sig1) + "-" + str(sig2)
         globals()[name] = getattr(handler, name)

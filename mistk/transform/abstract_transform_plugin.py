@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 from transitions.extensions import LockedMachine as Machine
 from transitions import State
 
@@ -40,7 +39,7 @@ class AbstractTransformPlugin (metaclass=ABCMeta):
         Initializes the Model and registers the default state machine transitions 
         available to all models.ctor
         """
-        
+        logger.info('Initializing AbstractTransformPlugin')
         self.state = None
         self._endpoint_service = None
         states = [State(n, on_enter='new_state_entered') for n in _transform_states]
@@ -112,7 +111,7 @@ class AbstractTransformPlugin (metaclass=ABCMeta):
     def transform(self, inputDirs, outputDir, properties):
         """
         Triggers the model to enter the training state.  A subsequent call to
-        do_train with the given parameters will be made as a result.
+        do_transform with the given parameters will be made as a result.
 
         This method should not be implemented or overwritten by subclasses.  It will be 
         created by the state machine.
@@ -157,7 +156,7 @@ class AbstractTransformPlugin (metaclass=ABCMeta):
         """
         Executes the transform activity
         """
-        logger.debug("_do_transform started")
+        logger.info("_do_transform started")
         try:
             logger.info("Calling do_transform method.")
             self.do_transform(inputDirs, outputDir, properties)
@@ -165,7 +164,7 @@ class AbstractTransformPlugin (metaclass=ABCMeta):
         except Exception as ex: #pylint: disable=broad-except
             logger.exception("Error running do_transform")
             self.fail(str(ex))
-        logger.debug("_do_transform complete")
+        logger.info("_do_transform complete")
     
     @abstractmethod    
     def do_transform(self, inputDirs, outputDir, properties):  # noqa: E501
