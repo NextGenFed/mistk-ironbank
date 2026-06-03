@@ -12,7 +12,7 @@ OUTPUT_BASE_DIR:=./
 
 # This needs to be imported from a sub directory.
 BASE_DIR:=$(shell pwd)/
-CODEGEN:=docker run --rm -u $(UID):$(GID) -v $(BASE_DIR):/$(NAMESPACE) -w /$(NAMESPACE) swaggerapi/swagger-codegen-cli:2.4.8
+CODEGEN:=docker run --rm -u $(UID):$(GID) -v $(BASE_DIR):/$(NAMESPACE) -w /$(NAMESPACE) swaggerapi/swagger-codegen-cli-v3:3.0.41
 
 .PHONY: help
 
@@ -29,15 +29,15 @@ clean: ## Remove all build artifacts
 
 gen/$(NAME)/model_server: mistk-model-api.yaml
 	rm -rf gen/$(NAME)/model_server
-	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/model_server -i $(OUTPUT_BASE_DIR)/mistk-model-api.yaml -D packageName=$(NAME).model.server
+	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/model_server -i $(OUTPUT_BASE_DIR)/mistk-model-api.yaml -DpackageName=$(NAME).model.server
 
 gen/$(NAME)/transform_server: mistk-transform-api.yaml
 	rm -rf gen/$(NAME)/transform_server
-	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/transform_server -i $(OUTPUT_BASE_DIR)/mistk-transform-api.yaml -D packageName=$(NAME).transform.server
+	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/transform_server -i $(OUTPUT_BASE_DIR)/mistk-transform-api.yaml -DpackageName=$(NAME).transform.server
 
 gen/$(NAME)/evaluation_server: mistk-evaluation-api.yaml
 	rm -rf gen/$(NAME)/evaluation_server
-	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/evaluation_server -i $(OUTPUT_BASE_DIR)/mistk-evaluation-api.yaml -D packageName=$(NAME).evaluation.server
+	$(CODEGEN) generate -l python-flask -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/evaluation_server -i $(OUTPUT_BASE_DIR)/mistk-evaluation-api.yaml -DpackageName=$(NAME).evaluation.server
 
 gen:: gen/$(NAME)_server gen/$(NAME)/transform_server gen/$(NAME)/evaluation_server
 
@@ -60,32 +60,29 @@ $(NAME)/server: gen/$(NAME)/model_server gen/$(NAME)/transform_server gen/$(NAME
 
 gen/$(NAME)/model_client: mistk-model-api.yaml
 	rm -rf gen/$(NAME)/model_client
-	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/model_client -i $(OUTPUT_BASE_DIR)/mistk-model-api.yaml -D packageName=$(NAME).model.client
+	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/model_client -i $(OUTPUT_BASE_DIR)/mistk-model-api.yaml -DpackageName=$(NAME).model.client
 
 gen/$(NAME)/transform_client: mistk-transform-api.yaml
 	rm -rf gen/$(NAME)/transform_client
-	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/transform_client -i $(OUTPUT_BASE_DIR)/mistk-transform-api.yaml -D packageName=$(NAME).transform.client
+	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/transform_client -i $(OUTPUT_BASE_DIR)/mistk-transform-api.yaml -DpackageName=$(NAME).transform.client
 
 gen/$(NAME)/evaluation_client: mistk-evaluation-api.yaml
 	rm -rf gen/$(NAME)/evaluation_client
-	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/evaluation_client -i $(OUTPUT_BASE_DIR)/mistk-evaluation-api.yaml -D packageName=$(NAME).evaluation.client
+	$(CODEGEN) generate -l python -o $(OUTPUT_BASE_DIR)/gen/$(NAME)/evaluation_client -i $(OUTPUT_BASE_DIR)/mistk-evaluation-api.yaml -DpackageName=$(NAME).evaluation.client
 
 gen:: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME)/evaluation_client
 
 $(NAME)/client: gen/$(NAME)/model_client gen/$(NAME)/transform_client gen/$(NAME)/evaluation_client ## Generate the client implementations from the swagger spec
 	rm -rf $(NAME)/model/client
 	mkdir -p $(NAME)/model/client
-	cp -rv gen/$(NAME)/model_client/$(NAME).model.client/* $(NAME)/model/client
 	cp -rv gen/$(NAME)/model_client/$(NAME)/model/client/* $(NAME)/model/client
 
 	rm -rf mistk/transform/client
 	mkdir -p mistk/transform/client
-	cp -rv gen/$(NAME)/transform_client/mistk.transform.client/* mistk/transform/client
 	cp -rv gen/$(NAME)/transform_client/mistk/transform/client/* mistk/transform/client
 
 	rm -rf mistk/evaluation/client
 	mkdir -p mistk/evaluation/client
-	cp -rv gen/$(NAME)/evaluation_client/mistk.evaluation.client/* mistk/evaluation/client
 	cp -rv gen/$(NAME)/evaluation_client/mistk/evaluation/client/* mistk/evaluation/client
 
 $(NAME): $(NAME)/server $(NAME)/client 
@@ -94,9 +91,10 @@ dist: $(NAME) docs  $(shell find $(NAME)) test-harness $(shell find . -maxdepth 
 	rm -rf dist && mkdir dist
 	export VERSION=$(VERSION)
 	$(PYTHON) --version
-	pip install wheel build==0.10.0
+	pip install wheel build==1.4.0
 	$(PYTHON) -m build -o dist/$(NAME)/
 	cd test-harness && $(PYTHON) -m build -o ../dist/$(NAME)-test-harness/
+	rm -rf gen
 
 install: dist ## Install the python library for the local user
 	$(PYTHON) -m pip install $(shell find dist -type f) --user

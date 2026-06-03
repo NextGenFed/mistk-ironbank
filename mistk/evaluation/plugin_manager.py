@@ -37,8 +37,6 @@ class EREPluginManager(object):
         path = Path(module.__file__)
         self._module_directory = path.parent
 
-        self.reload()
-                    
     def get_default_metrics_list(self, assessment_type):
         return self._default_metrics.get(assessment_type, [])
     

@@ -24,7 +24,7 @@ import itertools
 import uuid
 import connexion as cx
 import yaml
-from waitress import serve
+from bottle import run
 
 from flask import Response
 from rwlock.rwlock import RWLock
@@ -73,7 +73,8 @@ class TransformPluginEndpoint():
         initializeEndpointController(self, transform_plugin_endpoint_controller)
 
         self.app = cx.FlaskApp('mistk.transform.server')
-        self.app.app.json_encoder = mistk.data.utils.PresumptiveJSONEncoder
+        self.app.app.json_provider_class = mistk.data.utils.PresumptiveJSONEncoder3
+        self.app.app.json = mistk.data.utils.PresumptiveJSONEncoder3(self.app.app)
         self.app.add_api(self._load_api_spec())
 
         self._state_machine = None
@@ -96,7 +97,8 @@ class TransformPluginEndpoint():
         
         :param port: The port on which to start the server, defaults to 8080
         """
-        serve(self.app, port=port)
+        host = '0.0.0.0'
+        run(self.app, host=host, port=port, server='gevent')
 
     def _load_api_spec(self):
         """
@@ -227,7 +229,7 @@ class TransformPluginEndpoint():
             self._current_task.message = str(ex)
             raise
     
-    def get_status(self, watch=None, resourceVersion=None):  # noqa: E501
+    def get_status(self, watch=None, resource_version=None):  # noqa: E501
         """
         Retrieves the status of the transform plugin
     
@@ -238,17 +240,15 @@ class TransformPluginEndpoint():
             with self._status_lock.reader_lock:
                 if watch:
                     return Response(
-                        watch_manager.watch('status', resourceVersion, self._status),
+                        watch_manager.watch('status', resource_version, self._status),
                         mimetype="application/json")
-                else:         
+                else:
                     return self._status
         except RuntimeError as inst:
             msg = "Error while retrieving status for transform plugin. %s" % str(inst)
             logger.exception(msg)
             return ServiceError(500, msg), 500
-        return 'do some magic!'
-       
-    
+
     def terminate(self):  # noqa: E501
         """
         Shutdowns the transform plugin and cleans up any resources.
@@ -264,16 +264,17 @@ class TransformPluginEndpoint():
             return ServiceError(500, msg), 500
     
     
-    def transform(self, initParams):  # noqa: E501
+    def transform(self, body=None):  # noqa: E501
         """
         Performs the transforms defined for this plugin
     
-        :param initParams: A list of directory paths where input files can be found.
-        :type initParams: dict | bytes
+        :param body: A list of directory paths where input files can be found.
+        :type body: dict | bytes
     
         :rtype: None
         """
         logger.debug("transform called")
+        initParams = body
         try:
             if not isinstance(initParams, TransformSpecificationInitParams) and cx.request.is_json:
                 initParams = mistk.data.utils.deserialize_model(cx.request.get_json(), TransformSpecificationInitParams)
