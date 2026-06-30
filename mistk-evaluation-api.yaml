@@ -1,7 +1,7 @@
 openapi: 3.0.4
 
 info:
-  version: "1.3.0"
+  version: "1.3.1"
   title: "Model Integration Software ToolKit - Metric Evaluation"
 servers:
   - url: /v1/mistk/evaluation

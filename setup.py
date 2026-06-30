@@ -35,10 +35,10 @@ REQUIRES = [
     'bottle >= 0.12.25',
     'flask == 3.1.3',
     'csvvalidator >= 1.2',
-    'bson == 0.5.10'
+    'pymongo == 4.17.0'
 ]
 
-version_args = {"version": "1.3.0"}
+version_args = {"version": "1.3.1"}
 
 setuptools.setup(
     name='mistk',
