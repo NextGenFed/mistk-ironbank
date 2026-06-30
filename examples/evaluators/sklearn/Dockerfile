@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.14
 
 # Install Dependencies
 RUN mkdir -p /usr/src/evaluators/sklearn
