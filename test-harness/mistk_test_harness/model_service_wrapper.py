@@ -43,7 +43,7 @@ class ModelServiceWrapper(object):
             which includes the objectives, model hyperparameters, and
             model properties
         """
-        self._mi_api.initialize_model(initialization_parameters=initialization_parameters)
+        self._mi_api.initialize_model(body=initialization_parameters)
 
     def load_data(self, datasets=None):
         """
@@ -51,7 +51,7 @@ class ModelServiceWrapper(object):
         
         :param datasets: A dictionary mapping objectives (train, test) to MistkDataset objects
         """
-        self._mi_api.load_data(datasets=datasets)
+        self._mi_api.load_data(body=datasets)
 
     def build_model(self, model_path=None):
         """
@@ -134,7 +134,7 @@ class ModelServiceWrapper(object):
 
         :param props: A dictionary of metadata properties to be used by the model
         """
-        self._mi_api.update_stream_properties(props=props)
+        self._mi_api.update_stream_properties(body=props)
 
     def save_predictions(self, data_path):
         """

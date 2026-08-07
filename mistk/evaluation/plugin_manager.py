@@ -22,7 +22,7 @@ import os.path, shutil
 from pathlib import Path
 from configparser import ConfigParser
 from mistk import logger
-from mistk.model.client import Metric, MistkMetric
+from mistk.model.server.models import MistkMetric
 import mistk.data.utils as datautils
 
 class EREPluginManager(object):
@@ -36,6 +36,8 @@ class EREPluginManager(object):
         self._module_loaded = module
         path = Path(module.__file__)
         self._module_directory = path.parent
+
+        self.reload()
 
     def get_default_metrics_list(self, assessment_type):
         return self._default_metrics.get(assessment_type, [])

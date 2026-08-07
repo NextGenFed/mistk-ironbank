@@ -56,7 +56,7 @@ class EvaluationServiceWrapper(object):
             which includes the metrics, input (predictions and ground_truth) directories, output directory, and
             evaluation properties
         """
-        self._ti_api.evaluate(init_params=init_params)
+        self._ti_api.evaluate(body=init_params)
         
     def get_metrics(self):
         """
