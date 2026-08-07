@@ -26,7 +26,7 @@ REQUIRES = [
     'mistk'
 ]
 
-version_args = {"version": "1.3.1"}
+version_args = {"version": "1.3.2"}
 
 setuptools.setup(
     name='mistk-test-harness',
